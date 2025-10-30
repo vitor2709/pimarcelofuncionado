@@ -61,10 +61,10 @@ function Cart() {
       <main className="container mx-auto flex-1 px-4 py-8 md:py-12">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-4xl font-black tracking-tighter text-text-light dark:text-text-dark">Meu Carrinho</h1>
-          <a className="flex h-11 min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-md bg-slate-100 dark:bg-slate-800 px-4 text-sm font-bold tracking-wide transition-colors hover:bg-slate-200 dark:hover:bg-slate-700" href="/">
+          <Link to="/home" className="flex h-11 min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-md bg-slate-100 dark:bg-slate-800 px-4 text-sm font-bold tracking-wide transition-colors hover:bg-slate-200 dark:hover:bg-slate-700">
             <span className="material-symbols-outlined text-lg">arrow_back</span>
             <span>Continuar Comprando</span>
-          </a>
+          </Link>
         </div>
 
         {cartItems.length === 0 ? (
