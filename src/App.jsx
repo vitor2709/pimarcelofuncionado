@@ -9,6 +9,7 @@ import BebidasQuentes from './pages/BebidasQuentes'
 import BebidasGeladas from './pages/BebidasGeladas'
 import Salgados from './pages/Salgados'
 import Doces from './pages/Doces'
+import Profile from './pages/Profile'
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/bebidas-geladas" element={<BebidasGeladas />} />
         <Route path="/salgados" element={<Salgados />} />
         <Route path="/doces" element={<Doces />} />
+        <Route path="/perfil" element={<Profile />} />
       </Routes>
     </Router>
   )
