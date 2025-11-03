@@ -15,7 +15,7 @@ function Header() {
         <div className="flex items-center gap-9">
           <a className="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#menu">Menu</a>
           <a className="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#sobre">Sobre</a>
-          <a className="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary" href="#contato">Contato</a>
+          <Link to="/perfil" className="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary">Perfil</Link>
         </div>
         <Link to="/carrinho" className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
           <span className="truncate">Fazer Pedido</span>
