@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import CartHeader from '../components/CartHeader';
 import CartItem from '../components/CartItem';
@@ -6,47 +6,33 @@ import OrderSummary from '../components/OrderSummary';
 import EmptyCart from '../components/EmptyCart';
 
 function Cart() {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Café Espresso",
-      description: "Pequeno, Sem açúcar",
-      price: "R$ 5,00",
-      quantity: 1,
-      imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuCPT1pa1Ks7ENLS6DExwFSJOkoYvitOtyEOMTJj8wn6d-ycsrceFrvk-zpGtV2tKk9yiC73LWVubWZSyM4YATh48uKud30RwDk--JY0W2LfdoZN_hAUOVo0RPMmuT36MDFfseQuHutMNcPvDLcpkbaldCrArTJ4JImww1OBwrIT_eKJQinlhwOoYE0EyDW2PJwbeHdjFB4Mkpku-NLdhVIKCQHRpiJsJQOTShoOkTtMGDdNI4Dp3S3nkp_HlNiiAzpGqiorjGiwpA"
-    },
-    {
-      id: 2,
-      name: "Pão de Queijo",
-      description: "Tradicional",
-      price: "R$ 3,50",
-      quantity: 2,
-      imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuBb-G9a4e_caugvJZRoNym9GpHrR18B7Fd07hKSW0iX1F6NTlNxhrlEAKvNEk4bHdjVRAGcMgm8u00DkSM9GqgGeuiZzM5294WEaExd_8xmFRmeVFpA41raWVyF1QV4ZylR551j7zEYVy0SFQnf1kCeSBHUQwWSf9Zq0426LBGKjlkx1UE7egZWkHMYRlFLCDKAUBcbTiGT1_nPT09LAzsW0t_YzXy6n6l3NLNwYaqV6gWEWczo6ZhbeBEXQF_YhqnT2Ln1KRNxDA"
-    },
-    {
-      id: 3,
-      name: "Suco de Laranja Natural",
-      description: "500ml",
-      price: "R$ 8,00",
-      quantity: 1,
-      imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuA-nJj6z_5i55zgVujhryTOOUy3iXNe3aAZqs5NAmXnCA3xrYWyKd9_z3fDAuqHd6NzpAfnvDyr1opx-JUtxCasNGZuzBrzCHNZKHaHLe3PIBYjwdNIAyJ-1I8zrXt2GSkBITWhE-pHTD7BVj1YHuosUZf8reVzsdjlZB9wXyZebsDYdzUkUtuZ7eOuNbtPlMVQ8aPrCj2K1_vn0PeVs__cQ82oUQYbTcislY-SARxNofvXEqonZNJ305yVGHkgnKSLrwkGkzIiZA"
-    }
-  ]);
+  const [cartItems, setCartItems] = useState([]);
+
+  useEffect(() => {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    setCartItems(cart);
+  }, []);
 
   const handleUpdateQuantity = (itemId, newQuantity) => {
     if (newQuantity < 1) return;
-    setCartItems(cartItems.map(item => 
+    const updatedCart = cartItems.map(item => 
       item.id === itemId ? { ...item, quantity: newQuantity } : item
-    ));
+    );
+    setCartItems(updatedCart);
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
   };
 
   const handleRemoveItem = (itemId) => {
-    setCartItems(cartItems.filter(item => item.id !== itemId));
+    const updatedCart = cartItems.filter(item => item.id !== itemId);
+    setCartItems(updatedCart);
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
   };
 
   const calculateSubtotal = () => {
     return cartItems.reduce((total, item) => {
-      const price = parseFloat(item.price.replace('R$ ', '').replace(',', '.'));
+      const price = typeof item.price === 'string'
+        ? parseFloat(item.price.replace('R$', '').replace(',', '.').trim())
+        : item.price;
       return total + (price * item.quantity);
     }, 0);
   };

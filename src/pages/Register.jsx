@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { registrarUsuario } from '../services/authService';
 
 function Register() {
   const navigate = useNavigate();
@@ -11,6 +12,13 @@ function Register() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState(null);
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 4000);
+  };
 
   // Validações de senha
   const passwordValidations = {
@@ -26,33 +34,81 @@ function Register() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validações
     if (!formData.fullName || !formData.email || !formData.password || !formData.confirmPassword) {
-      alert('Por favor, preencha todos os campos');
+      showNotification('Por favor, preencha todos os campos', 'error');
       return;
     }
 
     if (!passwordValidations.minLength || !passwordValidations.hasUpperCase || !passwordValidations.hasNumber) {
-      alert('A senha não atende aos requisitos mínimos');
+      showNotification('A senha não atende aos requisitos mínimos', 'error');
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      alert('As senhas não coincidem');
+      showNotification('As senhas não coincidem', 'error');
       return;
     }
 
-    // Aqui você faria a chamada à API de registro
-    console.log('Registrando usuário:', formData);
-    alert('Conta criada com sucesso!');
-    navigate('/');
+    setLoading(true);
+
+    try {
+      // Registrar usuário no Supabase
+      const dadosPerfil = {
+        nome: formData.fullName
+      };
+
+      const { data, error } = await registrarUsuario(
+        formData.email,
+        formData.password,
+        dadosPerfil
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      showNotification('Conta criada com sucesso!', 'success');
+      setTimeout(() => navigate('/'), 2000);
+    } catch (error) {
+      console.error('Erro ao criar conta:', error);
+      
+      // Mensagens de erro mais amigáveis
+      let mensagemErro = 'Erro ao criar conta. ';
+      
+      if (error.message.includes('already registered')) {
+        mensagemErro += 'Este email já está cadastrado.';
+      } else if (error.message.includes('Password')) {
+        mensagemErro += 'A senha não atende aos requisitos.';
+      } else {
+        mensagemErro += error.message;
+      }
+      
+      showNotification(mensagemErro, 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center p-4 sm:p-6 lg:p-8 bg-background-light dark:bg-background-dark">
+      {/* Notification Toast */}
+      {notification && (
+        <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 ${
+          notification.type === 'success' 
+            ? 'bg-green-500 text-white' 
+            : 'bg-red-500 text-white'
+        }`}>
+          <span className="material-symbols-outlined text-2xl">
+            {notification.type === 'success' ? 'check_circle' : 'error'}
+          </span>
+          <span className="font-semibold">{notification.message}</span>
+        </div>
+      )}
+
       <div className="w-full max-w-md rounded-xl bg-background-light p-8 shadow-lg dark:bg-slate-900">
         <div className="flex flex-col gap-6">
           {/* Header */}
@@ -179,9 +235,10 @@ function Register() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="mt-4 flex h-12 w-full items-center justify-center rounded-lg bg-primary px-4 py-2 text-base font-bold text-accent transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
+              disabled={loading}
+              className="mt-4 flex h-12 w-full items-center justify-center rounded-lg bg-primary px-4 py-2 text-base font-bold text-accent transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 dark:focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Criar Conta
+              {loading ? 'Criando conta...' : 'Criar Conta'}
             </button>
           </form>
 

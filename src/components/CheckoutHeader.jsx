@@ -12,11 +12,6 @@ function CheckoutHeader() {
         <h2 className="text-gray-800 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Sesc Senac Cafeteria</h2>
       </Link>
       <div className="flex flex-1 justify-end gap-4 md:gap-8 items-center">
-        <div className="hidden md:flex items-center gap-9">
-          <Link to="/home" className="text-gray-800 dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent">Cardápio</Link>
-          <a className="text-gray-800 dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent" href="#promocoes">Promoções</a>
-          <a className="text-gray-800 dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent" href="#conta">Minha Conta</a>
-        </div>
         <Link to="/carrinho" className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
           <span className="material-symbols-outlined">shopping_cart</span>
         </Link>

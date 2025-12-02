@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import CheckoutHeader from '../components/CheckoutHeader';
 import Breadcrumb from '../components/Breadcrumb';
-import DeliveryOptionSelector from '../components/DeliveryOptionSelector';
 import ContactAddressForm from '../components/ContactAddressForm';
 import PaymentMethodSelector from '../components/PaymentMethodSelector';
 import CheckoutOrderSummary from '../components/CheckoutOrderSummary';
@@ -10,37 +9,26 @@ import CheckoutOrderSummary from '../components/CheckoutOrderSummary';
 function Checkout() {
   const navigate = useNavigate();
   
-  const [deliveryOption, setDeliveryOption] = useState('delivery');
   const [paymentMethod, setPaymentMethod] = useState('pix');
   const [formData, setFormData] = useState({
     name: '',
-    phone: '',
-    cep: '',
-    address: '',
-    number: '',
-    complement: ''
+    phone: ''
   });
+  const [orderItems, setOrderItems] = useState([]);
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  const orderItems = [
-    {
-      name: "Salada Tropical",
-      quantity: 1,
-      price: 22.50,
-      imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuC-rq1OiHqZhtApdzdfnAQt0s8h33PbMnFRIYPT-e-1bajwQpAtdlwqrxjD0LL7GATuEj-e0OlznRdmp2nYFbjdvX6t5rqCgtlXxRbFM3jO-AB1PeqSlQtp-AS1X8p8OXpXGO_Pxzg0ule4Sz6FkmYTPAK26rjLRzQXa1n-X1-8eqYBzjVc_ya2wM3_EE7ORbsgD1vk0vLwHyVpvAnHW60QZofuHgBnwXZB0ZS72vyzxuNrb4IyPnpbu90Tw2TBfLoI6MNf24TNew"
-    },
-    {
-      name: "Pizza Individual",
-      quantity: 1,
-      price: 18.00,
-      imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuB3k-pXQnpHIlBGkwKAyy_A_eH5w1xQ6DegKQpvAcZFwF_2A66bkMZJ5AzwoHA6OVCHxzF40wrUI967nSPpWAnW_tPzRF70mgET5UOF-CZpqm9Hlns_luG86Lb2Y-ml-CAom50kZeUA6uft6uhkuF56aokjGfuFtslF0_bmJZvTf4UjuOqLnqkk0XZ0JRrZr4A79Ssysj-GPL1agYDC5wrvpmmRRezd-rTnOy2FomjFdBsl7ELS9CusJqHPopTSPuDfyYzCZ8iQ4Q"
-    },
-    {
-      name: "Suco de Laranja",
-      quantity: 2,
-      price: 14.00,
-      imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuCrmrMsWxAtTrLJB8Ae_RCfDMMLqoFEDF5zkixoN9nh5VuYsZaraHlwuEYRVAZUQ5Wn04MkFEOxEduEINgNZicazG93aRCD8aspUBN_ydCctcdiNPSFib77zy7y_jNGPGwIZKI9xWDZTSI7D3o_EyuSS32KSlXTEfwPex9zM7-gbLRTPzbLOPrHoJ_TABsWSH7kAKYw0o6jPfuMNvge_rCC-rXAEIPLpe_oFnfTPIR0Zias-QJJ8MF3IxE3l6fsxzzb0_t_WsW5zQ"
-    }
-  ];
+  // Carregar itens do carrinho
+  useEffect(() => {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    // Converter formato do carrinho para formato do checkout
+    const items = cart.map(item => ({
+      name: item.name,
+      quantity: item.quantity,
+      price: parseFloat(item.price.replace('R$ ', '').replace(',', '.')),
+      imageUrl: item.image
+    }));
+    setOrderItems(items);
+  }, []);
 
   const breadcrumbItems = [
     { label: 'Carrinho', link: '/carrinho' },
@@ -48,9 +36,9 @@ function Checkout() {
     { label: 'Confirmação', link: null }
   ];
 
-  const subtotal = orderItems.reduce((sum, item) => sum + item.price, 0);
-  const deliveryFee = deliveryOption === 'delivery' ? 5.00 : 0;
-  const total = subtotal + deliveryFee;
+  const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const deliveryFee = 0;
+  const total = subtotal;
 
   const handleConfirmOrder = () => {
     // Validação básica
@@ -59,26 +47,74 @@ function Checkout() {
       return;
     }
 
-    if (deliveryOption === 'delivery' && (!formData.address || !formData.cep)) {
-      alert('Por favor, preencha o endereço de entrega');
+    if (orderItems.length === 0) {
+      alert('Seu carrinho está vazio!');
       return;
     }
 
-    // Aqui você pode adicionar a lógica para processar o pedido
-    console.log('Pedido confirmado:', {
-      deliveryOption,
-      paymentMethod,
-      formData,
-      orderItems,
-      total
-    });
+    // Criar objeto do pedido
+    const newOrder = {
+      id: `#${Date.now().toString().slice(-4)}`,
+      customer: formData.name,
+      phone: formData.phone,
+      date: new Date().toLocaleDateString('pt-BR'),
+      timestamp: Date.now(),
+      total: `R$ ${total.toFixed(2).replace('.', ',')}`,
+      status: 'Em Preparo',
+      statusColor: 'yellow',
+      paymentMethod: paymentMethod,
+      items: orderItems,
+      deliveryOption: 'pickup'
+    };
 
-    alert('Pedido confirmado com sucesso!');
-    navigate('/home');
+    // Salvar pedido no localStorage
+    const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+    existingOrders.unshift(newOrder); // Adicionar no início
+    localStorage.setItem('orders', JSON.stringify(existingOrders));
+
+    // Processar o pedido
+    console.log('Pedido confirmado:', newOrder);
+
+    // Limpar carrinho
+    localStorage.setItem('cart', JSON.stringify([]));
+
+    // Mostrar notificação de sucesso
+    setShowSuccess(true);
+
+    // Redirecionar após 3 segundos
+    setTimeout(() => {
+      navigate('/escolher-lanchonete');
+    }, 3000);
   };
 
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+      {/* Notificação de Sucesso */}
+      {showSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md mx-4 animate-bounce-in">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
+                <span className="material-symbols-outlined text-green-600 dark:text-green-400 text-5xl">check_circle</span>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                Pedido Confirmado!
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300 mb-1">
+                Seu pedido foi realizado com sucesso.
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Retire na lanchonete em 15-20 minutos.
+              </p>
+              <div className="mt-6 flex items-center gap-2 text-primary dark:text-accent">
+                <span className="material-symbols-outlined animate-spin">autorenew</span>
+                <span className="text-sm font-medium">Redirecionando...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="layout-container flex h-full grow flex-col">
         <CheckoutHeader />
         
@@ -112,10 +148,15 @@ function Checkout() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
               {/* Left Column */}
               <div className="lg:col-span-2 bg-white dark:bg-gray-800 p-6 md:p-8 rounded-xl shadow-sm">
-                <DeliveryOptionSelector 
-                  deliveryOption={deliveryOption}
-                  onSelectOption={setDeliveryOption}
-                />
+                <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 text-3xl">store</span>
+                    <div>
+                      <h3 className="font-bold text-gray-900 dark:text-white">Retirada na Lanchonete</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Seu pedido ficará pronto em 15-20 minutos</p>
+                    </div>
+                  </div>
+                </div>
                 
                 <ContactAddressForm 
                   formData={formData}

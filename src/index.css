@@ -1,20 +1,40 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #0056A0;
-  --color-secondary: #ffc107;
+  --color-primary: #005691;
+  --color-secondary: #FFC72C; 
   --color-accent: #FFCB05;
-  --color-background-light: #F8F9FA;
-  --color-background-dark: #101622;
+  --color-background-light: #FFFFFF;
+  --color-background-dark: #1a1a1a;
   --color-text-light: #333333;
-  --color-text-dark: #F8F9FA;
-  --color-border-light: #CED7E8;
-  --color-border-dark: #49659C;
+  --color-text-dark: #F4F7FA;
+  --color-border-light: #E0E0E0;
+  --color-border-dark: #333333;
+  --color-surface-light: #F4F7FA;
+  --color-surface-dark: #2c2c2c;
   
   --font-display: "Work Sans", "Lexend", sans-serif;
   
-  --radius: 0.25rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
+  --radius: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
   --radius-full: 9999px;
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.5s ease-out;
 }

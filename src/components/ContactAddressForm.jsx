@@ -1,7 +1,26 @@
 function ContactAddressForm({ formData, onFormChange }) {
   const handleChange = (e) => {
     const { id, value } = e.target;
-    onFormChange({ ...formData, [id]: value });
+    
+    // Aplicar máscara no telefone
+    if (id === 'phone') {
+      // Remove tudo que não é número
+      const phoneValue = value.replace(/\D/g, '');
+      
+      // Limita a 11 dígitos (DDD + 9 dígitos) e aplica a máscara (99) 99999-9999
+      let maskedPhone = phoneValue.slice(0, 11);
+      if (maskedPhone.length > 2) {
+        if (maskedPhone.length > 7) {
+          maskedPhone = maskedPhone.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+        } else {
+          maskedPhone = maskedPhone.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+        }
+      }
+      
+      onFormChange({ ...formData, [id]: maskedPhone });
+    } else {
+      onFormChange({ ...formData, [id]: value });
+    }
   };
 
   return (

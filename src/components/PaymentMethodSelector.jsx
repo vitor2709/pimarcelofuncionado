@@ -2,7 +2,8 @@ function PaymentMethodSelector({ paymentMethod, onSelectMethod }) {
   const paymentMethods = [
     { id: 'pix', icon: 'qr_code_2', label: 'Pix' },
     { id: 'credit', icon: 'credit_card', label: 'Cartão de Crédito' },
-    { id: 'meal-voucher', icon: 'card_membership', label: 'Vale Refeição' }
+    { id: 'debit', icon: 'credit_card', label: 'Cartão de Débito' },
+    { id: 'money', icon: 'payments', label: 'Dinheiro' }
   ];
 
   return (
