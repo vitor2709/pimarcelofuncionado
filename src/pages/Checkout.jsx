@@ -21,12 +21,19 @@ function Checkout() {
   useEffect(() => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     // Converter formato do carrinho para formato do checkout
-    const items = cart.map(item => ({
-      name: item.name,
-      quantity: item.quantity,
-      price: parseFloat(item.price.replace('R$ ', '').replace(',', '.')),
-      imageUrl: item.image
-    }));
+    const items = cart.map(item => {
+      // Garantir que o preço seja um número
+      const price = typeof item.price === 'string'
+        ? parseFloat(item.price.replace('R$', '').replace(',', '.').trim())
+        : item.price;
+      
+      return {
+        name: item.name,
+        quantity: item.quantity,
+        price: price,
+        imageUrl: item.image
+      };
+    });
     setOrderItems(items);
   }, []);
 
